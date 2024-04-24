@@ -1,5 +1,4 @@
 # MG(MG-GMRES)
-Multigrid Method for A Class of Static Friction Contact Problems
-Problem 1 放在P1
-Problem 2 放在P2
-
+Multigrid Method for A Class of Static Friction Contact Problems\\
+Example 1 is placed in folder P1\\
+Example 2 is placed in folder P2
