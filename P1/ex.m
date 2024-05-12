@@ -3,6 +3,7 @@ clc;
 close all;
 
 %% -------------------
+% 检验代码
 E =2;  % Young modulus
 k = 0.4;   % Poisson ratio of the material
 K1 = E*k/(1-k^2);    % Coefficient of operator i = j ;
