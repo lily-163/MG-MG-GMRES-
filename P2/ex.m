@@ -1,6 +1,8 @@
-% clear all;
-% clc;
-% ×î´ÖÍø¸ñ²ã h=1/4£¬¼ÇÎªµÚ1²ãÍø¸ñ£»
+clear all;
+clc;
+close all;
+
+%----------------------------------
 E =1;  % Young modulus
 k = 0.3;   % Poisson ratio of the material
 K1 = E*k/(1-k^2);    % Coefficient of operator i = j ;
@@ -18,19 +20,19 @@ for t = 5:-1:5
     h=1/(2^(t+1));
     [node,elem,Db,Nb_U,Nb_R,Cb]=generation_elem_node(h);
 
-    N = size(node,1);  %½Úµã¸öÊı
-    NT = size(elem,1); %µ¥Ôª¸öÊı
+    N = size(node,1);  %èŠ‚ç‚¹ä¸ªæ•°
+    NT = size(elem,1); %å•å…ƒä¸ªæ•°
     freeNodes = setdiff(1:N,unique(Db));  %Dirichlet points is certain.
     Cbpoint=unique(Cb);   nCb=length(Cbpoint);
     DbNodes = unique(Db); nDb = length(DbNodes);
     
 %     A=allA{t}*h^2;B1=allB{t}{1};B2=allB{t}{2};
-    A11 = sparse(N,N);   %×Ü¸Õ¾ØÕó
+    A11 = sparse(N,N);   %æ€»åˆšçŸ©é˜µ
     A12 = A11;A21 = A11;A22 = A11;
-    B1 = sparse(N,1);   %ÓÒ¶ËÏî
+    B1 = sparse(N,1);   %å³ç«¯é¡¹
     B2 = sparse(N,1); 
 
-    % ×Ü¸Õ¾ØÕó----±ê×¼µ¥ÔªÉÏ
+    % æ€»åˆšçŸ©é˜µ----æ ‡å‡†å•å…ƒä¸Š
     a1=0; b1=1; c1=0;
     a2=-1;b2=-1;c2=1;
     a3=1; b3=0; c3=0;coef=[a1 b1 c1;a2 b2 c2;a3 b3 c3];
@@ -55,13 +57,13 @@ for t = 5:-1:5
         B1(curelem)= B1(curelem)+Generate_f01(K1,K2,v(:,1),v(:,2))*S/3;
         B2(curelem)= B2(curelem)+Generate_f02(K1,K2,v(:,1),v(:,2))*S/3;
     end
-    % Gamma_2Ó¦Á¦Ìõ¼ş
+    % Gamma_2åº”åŠ›æ¡ä»¶
     if size(Nb_U,1) ~= 0
         for i = 1:1:size(Nb_U,1)
             curNb_L = Nb_U(i,:);
             length4curedge = norm(node(curNb_L(1),:)-node(curNb_L(2),:));
             v = node(curNb_L,:); 
-            [GL1,GL2] = Generate_gR(K1,K2,v); % ×ó±ß±ß½ç
+            [GL1,GL2] = Generate_gR(K1,K2,v); % å·¦è¾¹è¾¹ç•Œ
             B1(curNb_L) = B1(curNb_L)+(1/6)*length4curedge*GL1';
             B2(curNb_L) = B2(curNb_L)+(1/6)*length4curedge*GL2'; 
         end
@@ -71,29 +73,29 @@ for t = 5:-1:5
 %             curNb_R = Nb_R(i,:);
 %             length4curedge = norm(node(curNb_R(1),:)-node(curNb_R(2),:));
 %             v = node(curNb_R,:); 
-%             [GR1,GR2] = Generate_gR(K1,K2,v); % ÓÒ±ß±ß½ç
+%             [GR1,GR2] = Generate_gR(K1,K2,v); % å³è¾¹è¾¹ç•Œ
 %             B1(curNb_R) = B1(curNb_R)+(1/6)*length4curedge*GR1';
 %             B2(curNb_R) = B2(curNb_R)+(1/6)*length4curedge*GR2'; 
 %         end
 %     end
-    % Gamma_1±ß½çÌõ¼ş
+    % Gamma_1è¾¹ç•Œæ¡ä»¶
     if size(Db,1) ~= 0
         DbNodes = unique(Db);  %Dirichlet points is certain.
         nDb = length(DbNodes);
         A11(DbNodes,:)=0;A12(DbNodes,:)=0;
         A21(DbNodes,:)=0;A22(DbNodes,:)=0;
         A11(DbNodes,DbNodes)=speye(nDb);A22(DbNodes,DbNodes)=speye(nDb);
-        A21(Cbpoint,:)=0;A22(Cbpoint,:)=0;  % ±£Ö¤gamma3ÉÏu_{nu}=0
-        A22(Cbpoint,Cbpoint)=speye(nCb);    % ±£Ö¤gamma3ÉÏu_{nu}=0
+        A21(Cbpoint,:)=0;A22(Cbpoint,:)=0;  % ä¿è¯gamma3ä¸Šu_{nu}=0
+        A22(Cbpoint,Cbpoint)=speye(nCb);    % ä¿è¯gamma3ä¸Šu_{nu}=0
         A  = [A11,A12;A21,A22];
         B1(DbNodes)=sparse(nDb,1);B2(DbNodes)=sparse(nDb,1);
-        B2(Cbpoint)=sparse(nCb,1); % ±£Ö¤gamma3ÉÏu_{nu}=0
+        B2(Cbpoint)=sparse(nCb,1); % ä¿è¯gamma3ä¸Šu_{nu}=0
         B = [B1;B2];
     end
-    % gamma3Ä¦²Á±ß½ç;
+    % gamma3æ‘©æ“¦è¾¹ç•Œ;
     if size(Cb,1) ~= 0   
         for iter=1:1:maxiter 
-            % ¸üĞÂlambda³Ë×Ó;
+            % æ›´æ–°lambdaä¹˜å­;
             if iter==1
                 Lambda=sparse(N,1);
                 Lambda(Cbpoint) = sparse(nCb,1) ;
@@ -102,11 +104,11 @@ for t = 5:-1:5
                 for i=1:1:nCb
                     loc = Cbpoint(i);
                     lambda2=Lambda(loc)+rho*u(loc);
-                    lambda2=cal_tau(lambda2,u(loc)); % ±íÊ¾u2
+                    lambda2=cal_tau(lambda2,u(loc)); % è¡¨ç¤ºu2
                     Lambda(loc) = 0.5*Lambda(loc)+0.5*lambda2;
                 end
             end
-            % ¼ÆËã(lambda,v_nu);
+            % è®¡ç®—(lambda,v_nu);
 %             Lambda(Cbpoint) = sparse(nCb,1) ;
             CB1=B1;
             for i=1:1:size(Cb,1)
@@ -115,12 +117,12 @@ for t = 5:-1:5
                 F = Generate_tau(Lambda(curCb));
                 CB1(curCb) = CB1(curCb) - (1/6)*length4curedge*F';
             end
-            % ×é×°B
+            % ç»„è£…B
             if size(Db,1) ~= 0
                 CB1(DbNodes)=sparse(nDb,1);B2(DbNodes)=sparse(nDb,1);
                 B = [CB1;B2];
             end
-            % µü´úÊÕÁ²B1
+            % è¿­ä»£æ”¶æ•›B1
             if iter==1
                 u = A\B;
             else
@@ -138,7 +140,7 @@ for t = 5:-1:5
         end
     else
         u_ = A\B;
-    end  % gamma3Ä¦²Á±ß½ç;
+    end  % gamma3æ‘©æ“¦è¾¹ç•Œ;
     u=u_;
     x = 0:h:1;
     y = u(Cbpoint);
@@ -148,7 +150,7 @@ for t = 5:-1:5
         u = I*u;
         h=h/2;
     end
-%     ·µ»Ø¶şÎ¬Êı¾İ
+%     è¿”å›äºŒç»´æ•°æ®
     N = sqrt(length(u)/2); 
     u1=u(1:length(u)/2);u2=u(length(u)/2+1:end);
     U1=reshape(full(u1),N,N);U2=reshape(full(u2),N,N);
@@ -164,11 +166,11 @@ for t = 5:-1:5
         ss = ss+1;
     end
 end
-%% ¼ÆËãQ·¶ÊıÎó²î
+%% è®¡ç®—QèŒƒæ•°è¯¯å·®
 t = length(uerror);
 for i = 1:1:t-1
     orderu = uerror(i+1)/uerror(i);
-    fprintf('1/%d²ãÓë1/%d²ã¼äÊÕÁ²½×:%.4f\n',2^(t-i+2),2^(t-i+1),log2(orderu));
+    fprintf('1/%då±‚ä¸1/%då±‚é—´æ”¶æ•›é˜¶:%.4f\n',2^(t-i+2),2^(t-i+1),log2(orderu));
 end  
 % U1ref=U1;
 % U2ref=U2;
