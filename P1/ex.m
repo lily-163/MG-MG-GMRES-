@@ -1,13 +1,8 @@
-% clear;
+clear;
 clc;
-%% -----ÓĞÕæ½âµÄÀı×Ó
-% u1(x,y) = sin(pi*x)*exp(x)*y*(1-y);% Àı×Ó2
-% u2(x,y) = sin(2*pi*y)*log(1+x)*(1-x);
+close all;
 
-% u1 = y^2*(1 - y)*exp(x);  %Àı×Ó3
-% u2 = y*(y^2-1)*cos(pi*x);
 %% -------------------
-% ×î´ÖÍø¸ñ²ã h=1/4£¬¼ÇÎªµÚ1²ãÍø¸ñ£»
 E =2;  % Young modulus
 k = 0.4;   % Poisson ratio of the material
 K1 = E*k/(1-k^2);    % Coefficient of operator i = j ;
@@ -25,16 +20,16 @@ for t =5:-1:5
     h=1/(2^(t+1));
     [node,elem,Db,Nb_L,Nb_R,Cb]=generation_elem_node(h);
 
-    N = size(node,1);  %½Úµã¸öÊı
-    NT = size(elem,1); %µ¥Ôª¸öÊı
+    N = size(node,1);  %èŠ‚ç‚¹ä¸ªæ•°
+    NT = size(elem,1); %å•å…ƒä¸ªæ•°
     freeNodes = setdiff(1:N,unique(Db));  %Dirichlet points is certain.
     Cbpoint=unique(Cb);nCb=length(Cbpoint);
-    A11 = sparse(N,N);   %×Ü¸Õ¾ØÕó
+    A11 = sparse(N,N);   %æ€»åˆšçŸ©é˜µ
     A12 = A11;A21 = A11;A22 = A11;
-    B1 = sparse(N,1);   %ÓÒ¶ËÏî
+    B1 = sparse(N,1);   %å³ç«¯é¡¹
     B2 = sparse(N,1); 
 
-    % ×Ü¸Õ¾ØÕó----±ê×¼µ¥ÔªÉÏ
+    % æ€»åˆšçŸ©é˜µ----æ ‡å‡†å•å…ƒä¸Š
     a1=0; b1=1; c1=0;
     a2=-1;b2=-1;c2=1;
     a3=1; b3=0; c3=0;coef=[a1 b1 c1;a2 b2 c2;a3 b3 c3];
@@ -59,13 +54,13 @@ for t =5:-1:5
         B1(curelem)= B1(curelem)+Generate_f01(K1,K2,v(:,1),v(:,2))*S/3;
         B2(curelem)= B2(curelem)+Generate_f02(K1,K2,v(:,1),v(:,2))*S/3;
     end
-% Gamma_2Ó¦Á¦Ìõ¼ş
+% Gamma_2åº”åŠ›æ¡ä»¶
 if size(Nb_L,1) ~= 0
     for i = 1:1:size(Nb_L,1)
         curNb_L = Nb_L(i,:);
         length4curedge = norm(node(curNb_L(1),:)-node(curNb_L(2),:));
         v = node(curNb_L,:); 
-        [GL1,GL2] = Generate_gL(K1,K2,v); % ×ó±ß±ß½ç
+        [GL1,GL2] = Generate_gL(K1,K2,v); % å·¦è¾¹è¾¹ç•Œ
         B1(curNb_L) = B1(curNb_L)+(1/6)*length4curedge*GL1';
         B2(curNb_L) = B2(curNb_L)+(1/6)*length4curedge*GL2'; 
     end
@@ -75,12 +70,12 @@ if size(Nb_R,1) ~= 0
         curNb_R = Nb_R(i,:);
         length4curedge = norm(node(curNb_R(1),:)-node(curNb_R(2),:));
         v = node(curNb_R,:); 
-        [GR1,GR2] = Generate_gR(K1,K2,v); % ÓÒ±ß±ß½ç
+        [GR1,GR2] = Generate_gR(K1,K2,v); % å³è¾¹è¾¹ç•Œ
         B1(curNb_R) = B1(curNb_R)+(1/6)*length4curedge*GR1';
         B2(curNb_R) = B2(curNb_R)+(1/6)*length4curedge*GR2'; 
     end
 end
-% Gamma_1±ß½çÌõ¼ş
+% Gamma_1è¾¹ç•Œæ¡ä»¶
 if size(Db,1) ~= 0
     DbNodes = unique(Db);  %Dirichlet points is certain.
     nDb = length(DbNodes);
@@ -91,10 +86,10 @@ if size(Db,1) ~= 0
     B1(DbNodes)=sparse(nDb,1);B2(DbNodes)=sparse(nDb,1);
     B = [B1;B2];
 end
-% gamma3Ä¦²Á±ß½ç;
+% gamma3æ‘©æ“¦è¾¹ç•Œ;
 if size(Cb,1) ~= 0   
     for iter=1:1:maxiter 
-        % ¸üĞÂlambda³Ë×Ó;
+        % æ›´æ–°lambdaä¹˜å­;
         if iter==1
             % tem=1;
             Lambda=sparse(N,1);
@@ -103,13 +98,13 @@ if size(Cb,1) ~= 0
             Lambda0 = Lambda;
             for i=1:1:length(Cbpoint)
                 loc = Cbpoint(i);
-                flag1=nu(-u(N+loc)); % ±íÊ¾u_{nu} = -u2
+                flag1=nu(-u(N+loc)); % è¡¨ç¤ºu_{nu} = -u2
                 flag2=Lambda(loc)+rho*((-u(N+loc))-g);
                 % Lambda(loc) = 0.5*Lambda(loc)+0.5*flag1;     % pro2
                 Lambda(loc)=max(flag1,flag2);   % pro3
             end
         end
-        % ¼ÆËã(lambda,v_nu);
+        % è®¡ç®—(lambda,v_nu);
         CB2=B2;
         for i=1:1:size(Cb,1)
             curCb=Cb(i,:);
@@ -118,12 +113,12 @@ if size(Cb,1) ~= 0
             F = Generate_nu(Lambda(curCb));
             CB2(curCb) = CB2(curCb) - (1/6)*length4curedge*F';
         end
-        % ×é×°B
+        % ç»„è£…B
         if size(Db,1) ~= 0
             B1(DbNodes)=sparse(nDb,1);CB2(DbNodes)=sparse(nDb,1);
             B = [B1;CB2];
         end
-        % µü´úÊÕÁ²B1
+        % è¿­ä»£æ”¶æ•›B1
         if iter==1
             u = A\B;
             % [u,flag,relres,it0,resvec] = gmres(A,B,[],10^(-6),length(B),L,U,[]);
@@ -143,7 +138,7 @@ if size(Cb,1) ~= 0
     end
 else
     u_ = A\B; 
-end  % gamma3Ä¦²Á±ß½ç;
+end  % gamma3æ‘©æ“¦è¾¹ç•Œ;
 
 u=u_;
 while h>href
@@ -151,7 +146,7 @@ while h>href
     u = I*u;
     h=h/2;
 end
-% ·µ»Ø¶şÎ¬Êı¾İ
+% è¿”å›äºŒç»´æ•°æ®
 
 N = sqrt(length(u)/2); 
 u1=u(1:length(u)/2);u2=u(length(u)/2+1:end);
@@ -172,11 +167,11 @@ else
 end
 end
 
-%% ¼ÆËãQ·¶ÊıÎó²î
+%% è®¡ç®—QèŒƒæ•°è¯¯å·®
 t = length(uerror);
 for i = 1:1:t-1
     orderu = uerror(i+1)/uerror(i);
-    fprintf('1/%d²ãÓë1/%d²ã¼äÊÕÁ²½×:%.4f\n',2^(t-i+2),2^(t-i+1),log2(orderu));
+    fprintf('1/%då±‚ä¸1/%då±‚é—´æ”¶æ•›é˜¶:%.4f\n',2^(t-i+2),2^(t-i+1),log2(orderu));
 end   
 U1ref=U1;
 U2ref=U2;
