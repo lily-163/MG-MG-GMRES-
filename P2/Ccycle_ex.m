@@ -1,8 +1,9 @@
 clear;
-% clc;
-% ´Ó×î´ÖÍø¸ñ²ãµü´ú
+clc;
+close all;
+% ä»æœ€ç²—ç½‘æ ¼å±‚è¿­ä»£
 load('A-B.mat');    load('Uref.mat');
-% ²ÎÊı
+% å‚æ•°
 E =1;  % Young modulus
 k = 0.3;   % Poisson ratio of the material
 K1 = E*k/(1-k^2);    % Coefficient of operator i = j ;
@@ -15,18 +16,18 @@ maxN = 8;
 minN = 3;
 for l=minN:maxN
     h=1/(2^(l+1));
-    A=allA{l};  B=allB{l}; % ÆäÖĞB={B{1},B{2}};
+    A=allA{l};  B=allB{l}; % å…¶ä¸­B={B{1},B{2}};
     if l > minN
         u0 = I2htoh{l}*u_;
         [m,n]=size (I2htoh{l});
         I=I2htoh{l}(1:m/2,1:n/2);
         Lambda=I*Lambda;
     end
-    % u0=[]; Lambda=[];   %×¢Òâ
+    % u0=[]; Lambda=[];   %æ³¨æ„
     tic;
     [u_,Lambda,resvec,res,iter,Niter] = Friction_Solve(K1,K2,allA,B,h,u0,l,Lambda,restart,M,tol,g,rho,I2htoh,Rhto2h,i1,i2);
     t = toc;
-    fprintf("Íø¸ñ1/ %dµÄÇó½âÊ±¼ä:%.4f(s)\n",1/h,t);
+    fprintf("ç½‘æ ¼1/ %dçš„æ±‚è§£æ—¶é—´:%.4f(s)\n",1/h,t);
     % 
     u=u_;
 %     if l>minN
@@ -42,7 +43,7 @@ for l=minN:maxN
         u = I*u;
         h=h/2;
     end
-    % ·µ»Ø¶şÎ¬Êı¾İ
+    % è¿”å›äºŒç»´æ•°æ®
     N = sqrt(length(u)/2); 
     u1=u(1:length(u)/2);u2=u(length(u)/2+1:end);
     U1=reshape(full(u1),N,N);U2=reshape(full(u2),N,N);
@@ -52,8 +53,8 @@ for l=minN:maxN
 end
 
 
-%% ¼ÆËãQ·¶ÊıÎó²î
+%% è®¡ç®—QèŒƒæ•°è¯¯å·®
 for i = 3:1:maxN-1
     orderu = uerror(i-1,2)/uerror(i,2);
-    fprintf('1/%d²ãÓë1/%d²ã¼äÊÕÁ²½×:%.4f\n',2^(i),2^(i+1),log2(orderu));
+    fprintf('1/%då±‚ä¸1/%då±‚é—´æ”¶æ•›é˜¶:%.4f\n',2^(i),2^(i+1),log2(orderu));
 end   
